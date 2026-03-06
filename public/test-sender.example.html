@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>🧪 Simulador do Wix — Exemplo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      background: #f5f0e8;
+    }
+
+    code {
+      background: #e8e0d0;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    pre {
+      background: #e8e0d0;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>🧪 Como usar o Simulador do Wix</h1>
+  <p>
+    Copie este arquivo para <code>test-sender.html</code> (sem o <code>.example</code>)
+    e adicione os dados dos cursinhos exportados do Wix CMS.
+  </p>
+  <p>O arquivo <code>test-sender.html</code> está no <code>.gitignore</code> pois contém dados reais.</p>
+
+  <h2>Estrutura esperada do postMessage:</h2>
+  <pre><code>{
+  cursinhos: {
+    gratuitos:  [ ...lista de cursinhos gratuitos  ],
+    caros:      [ ...lista de cursinhos com bolsa  ],
+    acessiveis: [ ...lista de cursinhos acessíveis ]
+  },
+  filtros: {
+    tipoCurso: "checkboxTodos" | "checkboxGratuitos" | "checkboxPagosBolsa" | "checkboxPagosAcessiveis",
+    distancia: 10,  // km
+    endereco: {
+      location: { latitude: -23.5505, longitude: -46.6333 }
+    }
+  }
+}</code></pre>
+
+  <h2>Campos de cada cursinho:</h2>
+  <pre><code>{
+  "_id": "uuid",
+  "nome": "Nome do Cursinho",
+  "latitude": -23.5505,
+  "longitude": -46.6333,
+  "enderecoCompleto": "Rua Exemplo, 123",
+  "horario": "Seg. a sex. 18h - 22h",
+  "telefone": "(11) 99999-9999",
+  "email": "contato@cursinho.com",
+  "urlSite": "https://...",
+  "urlFacebook": "https://...",
+  "urlInstagram": "https://...",
+  "temProcessoSeletivo": "Sim" | "Não",
+  "vagasDisponiveisPresencial": 100,
+  "observacoes": "..."
+}</code></pre>
+</body>
+
+</html>

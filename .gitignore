@@ -1,0 +1,35 @@
+# Dependências
+node_modules/
+
+# Build
+dist/
+dist-ssr/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Ambiente local
+.env
+.env.local
+.env.*.local
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.agent
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# ─── Arquivos de teste local com dados reais ────────────────────────────────
+# Este arquivo simula o Wix e contém dados reais dos cursinhos.
+# Para rodar localmente, copie test-sender.example.html e renomeie.
+public/test-sender.html
