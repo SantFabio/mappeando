@@ -13,17 +13,17 @@ export function usePostMessage() {
       const raw = event.data;
 
       // Valida que ao menos um dos campos necessários está presente
-      if (!raw?.cursinhos && !raw?.filtros) return;
+      if (!raw?.mapData && !raw?.filters) return;
 
-      // Normaliza o aninhamento dos cursinhos (padrão Wix)
-      const cursinhos = raw.cursinhos ? (raw.cursinhos.cursinhos || raw.cursinhos) : undefined;
+      // Normaliza o aninhamento dos dados do mapa (padrão Wix) se houver
+      const mapData = raw.mapData ? (raw.mapData.mapData || raw.mapData) : undefined;
 
       setData(current => {
         // Se já existe um estado, apenas mesclamos o novo valor.
         // Se é o primeiro recebimento, combinamos com os valores brutos.
         return {
-          cursinhos: cursinhos ?? current?.cursinhos ?? { gratuitos: [], caros: [], acessiveis: [] },
-          filtros: raw.filtros ?? current?.filtros ?? { tipoCurso: 'checkboxTodos', distancia: 10 }
+          mapData: mapData ?? current?.mapData ?? { categoryA: [], categoryB: [], categoryC: [] },
+          filters: raw.filters ?? current?.filters ?? { category: 'all', distance: 10 }
         };
       });
     }

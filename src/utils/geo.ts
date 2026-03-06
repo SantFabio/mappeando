@@ -1,4 +1,4 @@
-import type { Cursinho } from '../types';
+import type { MapItem } from '../types';
 
 // ── Haversine ─────────────────────────────────────────────────────────────────
 export function distKm(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -12,17 +12,17 @@ export function distKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-export function filtrarPorDistancia(
-  lista: Cursinho[] | undefined | null,
+export function filterByDistance(
+  list: MapItem[] | undefined | null,
   lat: number,
   lon: number,
-  raio: number,
+  radius: number,
 ) {
-  if (!Array.isArray(lista)) return [];
+  if (!Array.isArray(list)) return [];
 
-  return lista.filter(c => {
-    if (!c.latitude || !c.longitude) return false;
-    if (!isFinite(c.latitude) || !isFinite(c.longitude)) return false;
-    return distKm(lat, lon, c.latitude, c.longitude) <= raio;
+  return list.filter(item => {
+    if (!item.latitude || !item.longitude) return false;
+    if (!isFinite(item.latitude) || !isFinite(item.longitude)) return false;
+    return distKm(lat, lon, item.latitude, item.longitude) <= radius;
   });
 }

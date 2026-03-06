@@ -1,26 +1,26 @@
 import { useState, useRef, useEffect } from 'react';
 
-import type { Cursinhos, Filtros, PostMessageEvent } from '../types';
-import { FiltrosAccordion } from '../components/MainPage/FiltrosAccordion';
+import type { MapData, Filters, PostMessageEvent } from '../types';
+import { FiltersAccordion } from '../components/MainPage/FiltersAccordion';
 import { JsonAccordion } from '../components/MainPage/JsonAccordion';
 
 export default function MainPage() {
-  const [cursinhosJson, setCursinhosJson] = useState<string>(JSON.stringify({
-    gratuitos: [],
-    caros: [],
-    acessiveis: []
+  const [mapDataJson, setMapDataJson] = useState<string>(JSON.stringify({
+    categoryA: [],
+    categoryB: [],
+    categoryC: []
   }, null, 2));
 
-  const [filtros, setFiltros] = useState<Filtros>({
-    tipoCurso: 'checkboxTodos',
-    distancia: 10,
-    endereco: {
+  const [filters, setFilters] = useState<Filters>({
+    category: 'all',
+    distance: 10,
+    address: {
       location: { latitude: -23.5505, longitude: -46.6333 }
     }
   });
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [activeAccordion, setActiveAccordion] = useState<'filtros' | 'json' | null>('filtros');
+  const [activeAccordion, setActiveAccordion] = useState<'filters' | 'json' | null>('filters');
   const [isDataFetched, setIsDataFetched] = useState(false);
   const [isMapReady, setIsMapReady] = useState(false);
   const [addressQuery, setAddressQuery] = useState('');
@@ -39,8 +39,8 @@ export default function MainPage() {
         const res = await fetch('/dynamic-prep-courses-map/courses.json');
         if (!res.ok) throw new Error('Não foi possível carregar o arquivo JSON');
         const data = await res.json();
-        const cursinhosData = data.cursinhos || data;
-        setCursinhosJson(JSON.stringify(cursinhosData, null, 2));
+        const initialMapData = data.cursinhos || data; // keep legacy fallback for old structure
+        setMapDataJson(JSON.stringify(initialMapData, null, 2));
         setIsDataFetched(true);
       } catch (e) {
         console.error('Erro ao carregar dados:', e);
@@ -65,9 +65,9 @@ export default function MainPage() {
   useEffect(() => {
     if (isMapReady && isDataFetched && iframeRef.current?.contentWindow) {
       try {
-        const cursinhos = JSON.parse(cursinhosJson);
-        // Envio inicial "puro" (APENAS cursinhos, sem filtros)
-        iframeRef.current.contentWindow.postMessage({ cursinhos }, '*');
+        const mapData = JSON.parse(mapDataJson);
+        // Envio inicial "puro" (APENAS mapa, sem filtros)
+        iframeRef.current.contentWindow.postMessage({ mapData }, '*');
       } catch (e) {
         console.error("Erro no envio inicial via handshake:", e);
       }
@@ -76,18 +76,18 @@ export default function MainPage() {
 
   const handleSend = () => {
     try {
-      const cursinhos: Cursinhos = JSON.parse(cursinhosJson);
-      // Aqui enviamos tanto cursinhos quanto filtros (por causa do clique no botão)
+      const mapData: MapData = JSON.parse(mapDataJson);
+      // Aqui enviamos tanto mapData quanto filters (por causa do clique no botão)
       const message: PostMessageEvent = {
-        cursinhos,
-        filtros
+        mapData,
+        filters
       };
 
       if (iframeRef.current?.contentWindow) {
         iframeRef.current.contentWindow.postMessage(message, '*');
       }
     } catch (e) {
-      alert('Erro ao processar JSON dos cursinhos: ' + (e as Error).message);
+      alert('Erro ao processar JSON: ' + (e as Error).message);
     }
   };
 
@@ -99,9 +99,9 @@ export default function MainPage() {
     setIsSearchingLocation(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setFiltros(prev => ({
+        setFilters((prev: Filters) => ({
           ...prev,
-          endereco: {
+          address: {
             location: { latitude: position.coords.latitude, longitude: position.coords.longitude }
           }
         }));
@@ -156,20 +156,20 @@ export default function MainPage() {
     setShowSuggestions(false);
 
     // Atualiza imediatamente e já manda
-    const novosFiltros = {
-      ...filtros,
-      endereco: {
+    const newFilters: Filters = {
+      ...filters,
+      address: {
         location: { latitude: lat, longitude: lon }
       }
     };
 
-    setFiltros(novosFiltros);
+    setFilters(newFilters);
     setHasCustomLocation(true);
 
     // Auto-enviar ao selecionar uma sugestão para ir mais rápido, se o mapa estiver pronto
     setTimeout(() => {
       if (iframeRef.current?.contentWindow) {
-        iframeRef.current.contentWindow.postMessage({ cursinhos: JSON.parse(cursinhosJson), filtros: novosFiltros }, '*');
+        iframeRef.current.contentWindow.postMessage({ mapData: JSON.parse(mapDataJson), filters: newFilters }, '*');
       }
     }, 100);
   };
@@ -187,9 +187,9 @@ export default function MainPage() {
         const feature = data.features[0];
         const [lon, lat] = feature.geometry.coordinates;
 
-        setFiltros(prev => ({
+        setFilters((prev: Filters) => ({
           ...prev,
-          endereco: {
+          address: {
             location: { latitude: lat, longitude: lon }
           }
         }));
@@ -229,10 +229,10 @@ export default function MainPage() {
 
         <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar flex flex-col gap-6">
 
-          {/* Filtros Accordion Item */}
-          <FiltrosAccordion
-            filtros={filtros}
-            setFiltros={setFiltros}
+          {/* Filters Accordion Item */}
+          <FiltersAccordion
+            filters={filters}
+            setFilters={setFilters}
             addressQuery={addressQuery}
             isSearchingLocation={isSearchingLocation}
             hasCustomLocation={hasCustomLocation}
@@ -250,8 +250,8 @@ export default function MainPage() {
 
           {/* JSON Accordion Item */}
           <JsonAccordion
-            cursinhosJson={cursinhosJson}
-            setCursinhosJson={setCursinhosJson}
+            mapDataJson={mapDataJson}
+            setMapDataJson={setMapDataJson}
             activeAccordion={activeAccordion}
             setActiveAccordion={setActiveAccordion}
           />

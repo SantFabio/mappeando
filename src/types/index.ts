@@ -1,43 +1,43 @@
-export interface Cursinho {
+export interface MapItem {
   _id?: string;
-  nome?: string;
-  regiao?: string;
-  enderecoCompleto?: string;
-  horario?: string;
-  temProcessoSeletivo?: string;
-  modalidadeRemota?: string;
-  vagasDisponiveisPresencial?: string | number;
-  vagasDisponiveisRemoto?: string | number;
-  telefone?: string;
+  name?: string;
+  region?: string;
+  fullAddress?: string;
+  schedule?: string;
+  hasSelectionProcess?: string;
+  isRemote?: string;
+  availableSeatsOnsite?: string | number;
+  availableSeatsRemote?: string | number;
+  phone?: string;
   email?: string;
-  observacoes?: string;
-  urlSite?: string;
-  urlFacebook?: string;
-  urlInstagram?: string;
+  observations?: string;
+  websiteUrl?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
   latitude?: number;
   longitude?: number;
 }
 
-export interface Endereco {
+export interface Address {
   location?: {
     latitude: number;
     longitude: number;
   };
 }
 
-export interface Filtros {
-  tipoCurso?: 'checkboxTodos' | 'checkboxGratuitos' | 'checkboxPagosBolsa' | 'checkboxPagosAcessiveis';
-  distancia?: number; // km
-  endereco?: Endereco | string;
+export interface Filters {
+  category?: 'all' | 'categoryA' | 'categoryB' | 'categoryC';
+  distance?: number; // km
+  address?: Address | string;
 }
 
-export interface Cursinhos {
-  gratuitos: Cursinho[];
-  caros: Cursinho[];      // pagos com bolsa
-  acessiveis: Cursinho[];
+export interface MapData {
+  categoryA: MapItem[];
+  categoryB: MapItem[];
+  categoryC: MapItem[];
 }
 
 export interface PostMessageEvent {
-  cursinhos: Cursinhos;
-  filtros: Filtros;
+  mapData: MapData;
+  filters: Filters;
 }

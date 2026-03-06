@@ -2,10 +2,10 @@ import { useEffect } from 'react';
 import { Legend } from '../components/ReceiverPage/Legend';
 import { MapView } from '../components/ReceiverPage/MapView';
 import { usePostMessage } from '../hooks/usePostMessage';
-import type { Cursinhos, Filtros } from '../types';
+import type { MapData, Filters } from '../types';
 
-const defaultCursinhos: Cursinhos = { gratuitos: [], caros: [], acessiveis: [] };
-const defaultFiltros: Filtros = { tipoCurso: 'checkboxTodos', distancia: 10 };
+const defaultMapData: MapData = { categoryA: [], categoryB: [], categoryC: [] };
+const defaultFilters: Filters = { category: 'all', distance: 10 };
 
 export default function ReceiverPage() {
   const data = usePostMessage();
@@ -15,13 +15,13 @@ export default function ReceiverPage() {
     window.parent.postMessage('MAP_READY', '*');
   }, []);
 
-  const cursinhos = data?.cursinhos ?? defaultCursinhos;
-  const filtros = data?.filtros ?? defaultFiltros;
+  const mapData = data?.mapData ?? defaultMapData;
+  const filters = data?.filters ?? defaultFilters;
 
   return (
     <div className="w-screen h-screen relative overflow-hidden bg-slate-50">
       {/* Mapa ocupa a tela toda */}
-      <MapView cursinhos={cursinhos} filtros={filtros} />
+      <MapView mapData={mapData} filters={filters} />
 
       {/* Legenda flutuante (posicionada internamente no componente como fixed) */}
       <Legend />

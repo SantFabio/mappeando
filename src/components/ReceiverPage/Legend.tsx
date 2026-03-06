@@ -1,13 +1,12 @@
-
 // Importa os SVGs das folhas
 import leafGreen from '../../assets/leafGreen.svg';
 import leafOrange from '../../assets/leafOrange.svg';
 import leafYellow from '../../assets/leafYellow.svg';
 
 const items = [
-  { src: leafGreen, label: 'Cursos gratuitos' },
-  { src: leafOrange, label: 'Cursos pagos' },
-  { src: leafYellow, label: 'Cursos pagos acessíveis' },
+  { src: leafGreen, label: 'Itens - Categoria A' },
+  { src: leafOrange, label: 'Itens - Categoria B' },
+  { src: leafYellow, label: 'Itens - Categoria C' },
 ];
 
 export function Legend() {

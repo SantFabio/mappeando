@@ -1,17 +1,17 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import type { Filtros } from '../../types';
+import type { Filters } from '../../types';
 
-interface FiltrosAccordionProps {
-  filtros: Filtros;
-  setFiltros: React.Dispatch<React.SetStateAction<Filtros>>;
+interface FiltersAccordionProps {
+  filters: Filters;
+  setFilters: React.Dispatch<React.SetStateAction<Filters>>;
   addressQuery: string;
   isSearchingLocation: boolean;
   hasCustomLocation: boolean;
   suggestions: any[];
   showSuggestions: boolean;
   setShowSuggestions: React.Dispatch<React.SetStateAction<boolean>>;
-  activeAccordion: 'filtros' | 'json' | null;
-  setActiveAccordion: React.Dispatch<React.SetStateAction<'filtros' | 'json' | null>>;
+  activeAccordion: 'filters' | 'json' | null;
+  setActiveAccordion: React.Dispatch<React.SetStateAction<'filters' | 'json' | null>>;
   handleAddressChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSearchAddress: () => void;
   handleGetMyLocation: () => void;
@@ -19,18 +19,18 @@ interface FiltrosAccordionProps {
   handleSend: () => void;
 }
 
-export function FiltrosAccordion({
-  filtros, setFiltros,
+export function FiltersAccordion({
+  filters, setFilters,
   addressQuery, isSearchingLocation, hasCustomLocation,
   suggestions, showSuggestions, setShowSuggestions,
   activeAccordion, setActiveAccordion,
   handleAddressChange, handleSearchAddress, handleGetMyLocation,
   handleSelectSuggestion, handleSend
-}: FiltrosAccordionProps) {
+}: FiltersAccordionProps) {
   return (
     <div className="border border-slate-100 rounded-2xl overflow-hidden bg-white/50 backdrop-blur-sm shadow-sm transition-all duration-300">
       <button
-        onClick={() => setActiveAccordion(activeAccordion === 'filtros' ? null : 'filtros')}
+        onClick={() => setActiveAccordion(activeAccordion === 'filters' ? null : 'filters')}
         className="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition-colors"
       >
         <h2 className="text-sm font-bold text-slate-800 tracking-wide flex items-center gap-3">
@@ -43,7 +43,7 @@ export function FiltrosAccordion({
           xmlns="http://www.w3.org/2000/svg"
           width="18" height="18"
           viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-          animate={{ rotate: activeAccordion === 'filtros' ? 180 : 0 }}
+          animate={{ rotate: activeAccordion === 'filters' ? 180 : 0 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
           className="text-slate-400"
         >
@@ -52,7 +52,7 @@ export function FiltrosAccordion({
       </button>
 
       <AnimatePresence initial={false}>
-        {activeAccordion === 'filtros' && (
+        {activeAccordion === 'filters' && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -62,16 +62,16 @@ export function FiltrosAccordion({
           >
             <div className="p-4 pt-0 border-t border-slate-50 space-y-4">
               <div className="flex flex-col gap-1.5 pt-4">
-                <label className="text-sm font-semibold text-slate-700">Tipo de Curso</label>
+                <label className="text-sm font-semibold text-slate-700">Categoria</label>
                 <select
                   className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all cursor-pointer"
-                  value={filtros.tipoCurso}
-                  onChange={(e) => setFiltros({ ...filtros, tipoCurso: e.target.value as Filtros['tipoCurso'] })}
+                  value={filters.category}
+                  onChange={(e) => setFilters({ ...filters, category: e.target.value as Filters['category'] })}
                 >
-                  <option value="checkboxTodos">Todos</option>
-                  <option value="checkboxGratuitos">Gratuitos</option>
-                  <option value="checkboxPagosBolsa">Pagos com Bolsa</option>
-                  <option value="checkboxPagosAcessiveis">Pagos Acessíveis</option>
+                  <option value="all">Todas as categorias</option>
+                  <option value="categoryA">Categoria A</option>
+                  <option value="categoryB">Categoria B</option>
+                  <option value="categoryC">Categoria C</option>
                 </select>
               </div>
 
@@ -81,7 +81,7 @@ export function FiltrosAccordion({
                   {!hasCustomLocation ? (
                     <span className="text-[10px] text-orange-600 font-bold bg-orange-100 px-2 py-0.5 rounded-full">Defina seu endereço</span>
                   ) : (
-                    <span>{filtros.distancia} km</span>
+                    <span>{filters.distance} km</span>
                   )}
                 </label>
                 <input
@@ -90,8 +90,8 @@ export function FiltrosAccordion({
                   max="100"
                   disabled={!hasCustomLocation}
                   className={`w-full accent-orange-500 ${!hasCustomLocation ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                  value={filtros.distancia}
-                  onChange={(e) => setFiltros({ ...filtros, distancia: parseInt(e.target.value) })}
+                  value={filters.distance}
+                  onChange={(e) => setFilters({ ...filters, distance: parseInt(e.target.value) })}
                 />
               </div>
 
@@ -159,13 +159,13 @@ export function FiltrosAccordion({
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[10px] font-bold text-slate-500 uppercase">Latitude Atribuída</label>
                     <div className="h-8 px-3 rounded-md bg-slate-50 border border-slate-100 flex items-center text-xs text-slate-500">
-                      {typeof filtros.endereco === 'object' ? filtros.endereco.location?.latitude : ''}
+                      {typeof filters.address === 'object' ? filters.address.location?.latitude : ''}
                     </div>
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[10px] font-bold text-slate-500 uppercase">Longitude Atribuída</label>
                     <div className="h-8 px-3 rounded-md bg-slate-50 border border-slate-100 flex items-center text-xs text-slate-500">
-                      {typeof filtros.endereco === 'object' ? filtros.endereco.location?.longitude : ''}
+                      {typeof filters.address === 'object' ? filters.address.location?.longitude : ''}
                     </div>
                   </div>
                 </div>

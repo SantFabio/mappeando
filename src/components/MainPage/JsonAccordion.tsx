@@ -1,13 +1,13 @@
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface JsonAccordionProps {
-  cursinhosJson: string;
-  setCursinhosJson: (val: string) => void;
-  activeAccordion: 'filtros' | 'json' | null;
-  setActiveAccordion: React.Dispatch<React.SetStateAction<'filtros' | 'json' | null>>;
+  mapDataJson: string;
+  setMapDataJson: (val: string) => void;
+  activeAccordion: 'filters' | 'json' | null;
+  setActiveAccordion: React.Dispatch<React.SetStateAction<'filters' | 'json' | null>>;
 }
 
-export function JsonAccordion({ cursinhosJson, setCursinhosJson, activeAccordion, setActiveAccordion }: JsonAccordionProps) {
+export function JsonAccordion({ mapDataJson, setMapDataJson, activeAccordion, setActiveAccordion }: JsonAccordionProps) {
   return (
     <div className={`${activeAccordion === 'json' ? 'flex-1' : 'shrink-0'} border border-slate-100 rounded-2xl overflow-hidden bg-white/50 backdrop-blur-sm shadow-sm transition-all duration-300 flex flex-col`}>
       <button
@@ -45,9 +45,9 @@ export function JsonAccordion({ cursinhosJson, setCursinhosJson, activeAccordion
               <div className="flex-1 flex flex-col gap-3 pt-4">
                 <textarea
                   className="flex-1 w-full p-4 rounded-xl border border-slate-200 bg-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 resize-none min-h-[200px]"
-                  value={cursinhosJson}
-                  onChange={(e) => setCursinhosJson(e.target.value)}
-                  placeholder='{ "gratuitos": [], ... }'
+                  value={mapDataJson}
+                  onChange={(e) => setMapDataJson(e.target.value)}
+                  placeholder='{ "categoryA": [], "categoryB": [], "categoryC": [] }'
                 />
               </div>
             </div>

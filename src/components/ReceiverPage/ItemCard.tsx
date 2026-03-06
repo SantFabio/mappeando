@@ -4,7 +4,7 @@ interface Props {
   item: MapItem;
 }
 
-export function CourseCard({ item }: Props) {
+export function ItemCard({ item }: Props) {
   return (
     <article className="text-sm max-w-xs font-sans">
       <header className="mb-2">
