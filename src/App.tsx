@@ -4,7 +4,7 @@ import ReceiverPage from './pages/ReceiverPage';
 
 export default function App() {
   return (
-    <Router basename="/dynamic-prep-courses-map">
+    <Router basename="/dynamic-map">
       <Routes>
         {/* Página Principal (Simulador) */}
         <Route path="/" element={<MainPage />} />

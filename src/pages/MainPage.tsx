@@ -36,11 +36,23 @@ export default function MainPage() {
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        const res = await fetch('/dynamic-prep-courses-map/courses.json');
+        const res = await fetch('/dynamic-map/courses.json');
         if (!res.ok) throw new Error('Não foi possível carregar o arquivo JSON');
         const data = await res.json();
         const initialMapData = data.cursinhos || data; // keep legacy fallback for old structure
-        setMapDataJson(JSON.stringify(initialMapData, null, 2));
+
+        // Adaptação dos dados de teste: garante as chaves genéricas usadas no MapView
+        const keys = Object.keys(initialMapData);
+        let mappedData = initialMapData;
+        if (keys.length > 0 && keys[0] !== 'categoryA') {
+          mappedData = {
+            categoryA: initialMapData[keys[0]] || [],
+            categoryB: initialMapData[keys[1]] || [],
+            categoryC: initialMapData[keys[2]] || []
+          };
+        }
+
+        setMapDataJson(JSON.stringify(mappedData, null, 2));
         setIsDataFetched(true);
       } catch (e) {
         console.error('Erro ao carregar dados:', e);
@@ -210,7 +222,7 @@ export default function MainPage() {
       <div className="absolute inset-0 z-0">
         <iframe
           ref={iframeRef}
-          src="/dynamic-prep-courses-map/map"
+          src="/dynamic-map/map"
           className="w-full h-full border-none"
           title="Mapa Preview"
         />
