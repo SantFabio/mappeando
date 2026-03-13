@@ -1,34 +1,41 @@
 import { MapContainer, TileLayer, Marker, Popup, Circle, ZoomControl } from 'react-leaflet';
-import type { Filters, MapData } from '../../types';
-import { iconGreen, iconOrange, iconYellow } from '../../utils/leafletIcons';
+import L from 'leaflet';
+import type { Filters, MapData, MapConfig } from '../../types';
 import { filterByDistance } from '../../utils/geo';
 import { FlyTo } from './FlyTo';
 import { Markers } from './Markers';
 
 // ── MapView ───────────────────────────────────────────────────────────────────
 interface Props {
+  config: MapConfig;
   mapData: MapData;
   filters: Filters;
 }
 
-export function MapView({ mapData, filters }: Props) {
+export function MapView({ config, mapData, filters }: Props) {
   const address = typeof filters.address === 'object' ? filters.address : null;
   const userLat = address?.location?.latitude;
   const userLon = address?.location?.longitude;
-  const radius = filters.distance ?? 10;
+  const radius = filters.distance ?? config.radius ?? 10;
   const category = filters.category ?? 'all';
 
   const hasLocation = userLat !== undefined && userLon !== undefined &&
     isFinite(userLat) && isFinite(userLon);
 
-  const itemsCategoryA = hasLocation ? filterByDistance(mapData?.categoryA, userLat!, userLon!, radius) : (mapData?.categoryA ?? []);
-  const itemsCategoryB = hasLocation ? filterByDistance(mapData?.categoryB, userLat!, userLon!, radius) : (mapData?.categoryB ?? []);
-  const itemsCategoryC = hasLocation ? filterByDistance(mapData?.categoryC, userLat!, userLon!, radius) : (mapData?.categoryC ?? []);
+  // Helper para criar ícones dinâmicamente
+  const createDynamicIcon = (color: string, icon: string) => {
+    return (L as any).AwesomeMarkers.icon({
+      icon: icon,
+      prefix: 'fa',
+      markerColor: color as any,
+      iconColor: 'white'
+    });
+  };
 
   return (
     <MapContainer
-      center={[-23.5505, -46.6333]}
-      zoom={11}
+      center={[config.center.latitude, config.center.longitude]}
+      zoom={config.zoom}
       minZoom={2}
       maxZoom={18}
       zoomControl={false}
@@ -54,15 +61,22 @@ export function MapView({ mapData, filters }: Props) {
         </>
       )}
 
-      {(category === 'all' || category === 'categoryA') && (
-        <Markers list={itemsCategoryA} icon={iconGreen} />
-      )}
-      {(category === 'all' || category === 'categoryB') && (
-        <Markers list={itemsCategoryB} icon={iconOrange} />
-      )}
-      {(category === 'all' || category === 'categoryC') && (
-        <Markers list={itemsCategoryC} icon={iconYellow} />
-      )}
+      {config.categories.map((cat) => {
+        if (category !== 'all' && category !== cat.id) return null;
+        
+        const list = mapData[cat.id] || [];
+        const filteredList = hasLocation 
+          ? filterByDistance(list, userLat!, userLon!, radius) 
+          : list;
+
+        return (
+          <Markers 
+            key={cat.id} 
+            list={filteredList} 
+            icon={createDynamicIcon(cat.color, cat.icon)} 
+          />
+        );
+      })}
     </MapContainer>
   );
 }

@@ -1,15 +1,29 @@
 import { useState, useRef, useEffect } from 'react';
 
-import type { MapData, Filters, PostMessageEvent } from '../types';
+import type { MapData, Filters, PostMessageEvent, MapConfig } from '../types';
 import { FiltersAccordion } from '../components/MainPage/FiltersAccordion';
 import { JsonAccordion } from '../components/MainPage/JsonAccordion';
+import { ConfigAccordion } from '../components/MainPage/ConfigAccordion';
 
 export default function MainPage() {
-  const [mapDataJson, setMapDataJson] = useState<string>(JSON.stringify({
+  const [mapConfig, setMapConfig] = useState<MapConfig>({
+    center: { latitude: -23.5505, longitude: -46.6333 },
+    zoom: 11,
+    radius: 10,
+    categories: [
+      { id: 'categoryA', name: 'Categoria A', color: 'green', icon: 'graduation-cap' },
+      { id: 'categoryB', name: 'Categoria B', color: 'orange', icon: 'book' },
+      { id: 'categoryC', name: 'Categoria C', color: 'cadetblue', icon: 'university' }
+    ]
+  });
+
+  const [mapItems, setMapItems] = useState<MapData>({
     categoryA: [],
     categoryB: [],
     categoryC: []
-  }, null, 2));
+  });
+
+  const [mapDataJson, setMapDataJson] = useState<string>("");
 
   const [filters, setFilters] = useState<Filters>({
     category: 'all',
@@ -20,7 +34,7 @@ export default function MainPage() {
   });
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [activeAccordion, setActiveAccordion] = useState<'filters' | 'json' | null>('filters');
+  const [activeAccordion, setActiveAccordion] = useState<'filters' | 'json' | 'config' | null>('config');
   const [isDataFetched, setIsDataFetched] = useState(false);
   const [isMapReady, setIsMapReady] = useState(false);
   const [addressQuery, setAddressQuery] = useState('');
@@ -39,20 +53,26 @@ export default function MainPage() {
         const res = await fetch('/dynamic-map/courses.json');
         if (!res.ok) throw new Error('Não foi possível carregar o arquivo JSON');
         const data = await res.json();
-        const initialMapData = data.cursinhos || data; // keep legacy fallback for old structure
+        const initialMapData = data.cursinhos || data;
 
-        // Adaptação dos dados de teste: garante as chaves genéricas usadas no MapView
         const keys = Object.keys(initialMapData);
         let mappedData = initialMapData;
-        if (keys.length > 0 && keys[0] !== 'categoryA') {
+        if (keys.length > 0 && keys[0] !== 'categoryA' && keys[0] !== 'config') {
           mappedData = {
             categoryA: initialMapData[keys[0]] || [],
             categoryB: initialMapData[keys[1]] || [],
             categoryC: initialMapData[keys[2]] || []
           };
         }
-
-        setMapDataJson(JSON.stringify(mappedData, null, 2));
+        
+        // Se já tiver config no JSON, carrega ela
+        if (data.config) {
+          setMapConfig(data.config);
+          setMapItems(data.mapData || {});
+        } else {
+          setMapItems(mappedData);
+        }
+        
         setIsDataFetched(true);
       } catch (e) {
         console.error('Erro ao carregar dados:', e);
@@ -61,7 +81,16 @@ export default function MainPage() {
     loadInitialData();
   }, []);
 
-  // Handshake listener: Ouvir quando o mapa diz que está pronto
+  // Sincronizar o JSON quando config ou mapItems mudar
+  useEffect(() => {
+    const fullData = {
+      config: mapConfig,
+      mapData: mapItems
+    };
+    setMapDataJson(JSON.stringify(fullData, null, 2));
+  }, [mapConfig, mapItems]);
+
+  // Handshake listener
   useEffect(() => {
     const handleMapReady = (event: MessageEvent) => {
       if (event.data === 'MAP_READY') {
@@ -73,33 +102,37 @@ export default function MainPage() {
     return () => window.removeEventListener('message', handleMapReady);
   }, []);
 
-  // Sincronização inicial: Quando o mapa E os dados estiverem prontos
+  // Sincronização automática quando o mapa estiver pronto ou dados mudarem
   useEffect(() => {
     if (isMapReady && isDataFetched && iframeRef.current?.contentWindow) {
-      try {
-        const mapData = JSON.parse(mapDataJson);
-        // Envio inicial "puro" (APENAS mapa, sem filtros)
-        iframeRef.current.contentWindow.postMessage({ mapData }, '*');
-      } catch (e) {
-        console.error("Erro no envio inicial via handshake:", e);
-      }
-    }
-  }, [isMapReady, isDataFetched]); // Trigger quando qualquer um dos dois ficar pronto
-
-  const handleSend = () => {
-    try {
-      const mapData: MapData = JSON.parse(mapDataJson);
-      // Aqui enviamos tanto mapData quanto filters (por causa do clique no botão)
       const message: PostMessageEvent = {
-        mapData,
+        config: mapConfig,
+        mapData: mapItems,
         filters
       };
+      iframeRef.current.contentWindow.postMessage(message, '*');
+    }
+  }, [isMapReady, isDataFetched, mapConfig, mapItems, filters]);
 
-      if (iframeRef.current?.contentWindow) {
-        iframeRef.current.contentWindow.postMessage(message, '*');
-      }
+  const handleSend = () => {
+    if (iframeRef.current?.contentWindow) {
+      const message: PostMessageEvent = {
+        config: mapConfig,
+        mapData: mapItems,
+        filters
+      };
+      iframeRef.current.contentWindow.postMessage(message, '*');
+    }
+  };
+
+  const handleJsonChange = (val: string) => {
+    setMapDataJson(val);
+    try {
+      const parsed = JSON.parse(val);
+      if (parsed.config) setMapConfig(parsed.config);
+      if (parsed.mapData) setMapItems(parsed.mapData);
     } catch (e) {
-      alert('Erro ao processar JSON: ' + (e as Error).message);
+      // Ignora erro de parse enquanto o usuário digita
     }
   };
 
@@ -234,12 +267,20 @@ export default function MainPage() {
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-map-pin"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" /><circle cx="12" cy="10" r="3" /></svg>
           </div>
           <div>
-            <h1 className="font-bold text-xl tracking-tight text-slate-900">Simulador Wix</h1>
+            <h1 className="font-bold text-xl tracking-tight text-slate-900">Mappeando</h1>
             <p className="text-xs text-slate-500 uppercase font-semibold tracking-wider">Configuração de Dados</p>
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar flex flex-col gap-6">
+
+          {/* Config Accordion Item */}
+          <ConfigAccordion
+            config={mapConfig}
+            onUpdateConfig={setMapConfig}
+            activeAccordion={activeAccordion}
+            setActiveAccordion={setActiveAccordion}
+          />
 
           {/* Filters Accordion Item */}
           <FiltersAccordion
@@ -251,8 +292,8 @@ export default function MainPage() {
             suggestions={suggestions}
             showSuggestions={showSuggestions}
             setShowSuggestions={setShowSuggestions}
-            activeAccordion={activeAccordion}
-            setActiveAccordion={setActiveAccordion}
+            activeAccordion={activeAccordion as any}
+            setActiveAccordion={setActiveAccordion as any}
             handleAddressChange={handleAddressChange}
             handleSearchAddress={handleSearchAddress}
             handleGetMyLocation={handleGetMyLocation}
@@ -263,9 +304,9 @@ export default function MainPage() {
           {/* JSON Accordion Item */}
           <JsonAccordion
             mapDataJson={mapDataJson}
-            setMapDataJson={setMapDataJson}
-            activeAccordion={activeAccordion}
-            setActiveAccordion={setActiveAccordion}
+            setMapDataJson={handleJsonChange}
+            activeAccordion={activeAccordion as any}
+            setActiveAccordion={setActiveAccordion as any}
           />
         </div>
 

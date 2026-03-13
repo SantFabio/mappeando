@@ -25,19 +25,35 @@ export interface Address {
   };
 }
 
+export interface CategoryConfig {
+  id: string;
+  name: string;
+  color: string;
+  icon: string;
+}
+
 export interface Filters {
-  category?: 'all' | 'categoryA' | 'categoryB' | 'categoryC';
+  category?: string;
   distance?: number; // km
   address?: Address | string;
 }
 
+export interface MapConfig {
+  center: {
+    latitude: number;
+    longitude: number;
+  };
+  zoom: number;
+  radius: number;
+  categories: CategoryConfig[];
+}
+
 export interface MapData {
-  categoryA: MapItem[];
-  categoryB: MapItem[];
-  categoryC: MapItem[];
+  [key: string]: MapItem[];
 }
 
 export interface PostMessageEvent {
+  config: MapConfig;
   mapData: MapData;
   filters: Filters;
 }
